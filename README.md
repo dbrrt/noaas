@@ -29,11 +29,19 @@ make dev
 
 ### Start E2E
 
+1) Start Nomad in a container
+
+```
+make start_nomad_compose
+```
+
+2) Execute API tests
+
 ```bash
 make ci
 ```
 
-## Comments
+## Notes
 
 - busybox has been used instead of nginx, as it's simpler to configure, can receive dynamic port through command line, doesn't require a custom configuration file.
 - only one package has been defined for the sake of simplicity, in a larger codebase, I'd split across multiple package to foster better isolation

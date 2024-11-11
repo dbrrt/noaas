@@ -1,5 +1,6 @@
 # project binaries
 GO_BIN := go
+GO_TEST := go test
 # project sources
 ROOT_PRJ := .
 
@@ -21,4 +22,8 @@ start_nomad_compose:
 
 .PHONY: ci
 ci:
-	$(GO_BIN) test
+	$(GO_TEST)
+
+.PHONY: unit
+unit:
+	$(GO_TEST) ./readuri

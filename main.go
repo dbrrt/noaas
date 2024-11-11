@@ -1,21 +1,3 @@
-// package main
-
-// import (
-// 	"net/http"
-
-// 	"github.com/gin-gonic/gin"
-// )
-
-// func main() {
-// 	r := gin.Default()
-// 	r.GET("/ping", func(c *gin.Context) {
-// 		c.JSON(http.StatusOK, gin.H{
-// 			"message": "pong",
-// 		})
-// 	})
-// 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-// }
-
 package main
 
 import (
@@ -24,14 +6,6 @@ import (
 
 	"github.com/hashicorp/nomad/api"
 )
-
-func stringPtr(s string) *string {
-	return &s
-}
-
-func intToPtr(i int) *int {
-	return &i
-}
 
 func main() {
 	// Create a new Nomad client
@@ -53,44 +27,6 @@ func main() {
 	// fmt.Printf(uri)
 }
 
-// func createBatchJob() *api.Job {
-
-// 	// Define a job
-// 	job := &api.Job{
-// 		ID:   stringPtr("example-batch"),
-// 		Name: stringPtr("example-batch"),
-// 		Type: stringPtr("batch"),
-// 	}
-
-// 	// Define task group
-// 	taskGroup := &api.TaskGroup{
-// 		Name:  stringPtr("example-group"),
-// 		Count: intToPtr(1),
-// 	}
-
-// 	// // Define task
-// 	task := &api.Task{
-// 		Name:   "example-task",
-// 		Driver: "docker",
-// 		Config: map[string]interface{}{
-// 			"image": "alpine",                                   // Docker image to run
-// 			"args":  []string{"sh", "-c", "echo Hello, Nomad!"}, // Command
-// 		},
-// 		Resources: &api.Resources{
-// 			CPU:      intToPtr(100),
-// 			MemoryMB: intToPtr(128),
-// 		},
-// 	}
-
-// 	// Add the task to the task group
-// 	taskGroup.Tasks = []*api.Task{task}
-
-// 	// Add the task group to the job
-// 	job.TaskGroups = []*api.TaskGroup{taskGroup}
-
-//		return job
-//		// // Register the job with Nomad
-//	}
 func createServiceJob() *api.Job {
 	// Define the service job
 	job := &api.Job{
@@ -234,31 +170,10 @@ func getJobUri(client *api.Client, jobId string) (string, error) {
 	return uri, nil
 }
 
-// func waitForJobCompletion(client *api.Client, jobID string) {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-// 	defer cancel()
+func stringPtr(s string) *string {
+	return &s
+}
 
-// 	for {
-// 		// Fetch job info to check status
-// 		job, _, err := client.Jobs().Info(jobID, nil)
-// 		if err != nil {
-// 			log.Fatalf("Failed to fetch job info: %v", err)
-// 		}
-
-// 		// Check if job has completed
-// 		if job.Status != nil && *job.Status == "complete" {
-// 			fmt.Printf("Job %s completed successfully\n", jobID)
-// 			return
-// 		}
-
-// 		// Check for other job statuses
-// 		fmt.Printf("Job %s status: %s\n", jobID, *job.Status)
-// 		time.Sleep(5 * time.Second) // Poll every 5 seconds
-
-// 		// End the loop if the context expires
-// 		if ctx.Err() != nil {
-// 			log.Fatalf("Timed out waiting for job completion")
-// 			return
-// 		}
-// 	}
-// }
+func intToPtr(i int) *int {
+	return &i
+}

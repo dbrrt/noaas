@@ -37,5 +37,5 @@ jobs:
           ${{ runner.os }}-go-
     # - name: Test
     #   run: make test
-    # - name: CI
-    #   run: make ci
+    - name: CI
+      run: make ci

@@ -8,6 +8,14 @@ import (
 	"github.com/hashicorp/nomad/api"
 )
 
+func stringPtr(s string) *string {
+	return &s
+}
+
+func intToPtr(i int) *int {
+	return &i
+}
+
 func createAJobAndGetUri() {
 	// Create a new Nomad client
 	client, err := api.NewClient(api.DefaultConfig())
@@ -98,11 +106,11 @@ func createServiceJob() *api.Job {
 	job := &api.Job{
 		// ID must be uuid
 		ID:          stringPtr("hello-world"),
-		Name:        stringPtr("noaas-remote-script"),
+		Name:        stringPtr("noaas-agent"),
 		Type:        stringPtr("service"),
 		Datacenters: []string{"*"}, // Specifies that this job can run in any datacenter
 		Meta: map[string]string{
-			"foo": "bar", // Meta information
+			"CreatedAt": time.Now().String(), // Meta information
 		},
 	}
 
@@ -158,12 +166,4 @@ func createServiceJob() *api.Job {
 	job.TaskGroups = []*api.TaskGroup{taskGroup}
 
 	return job
-}
-
-func stringPtr(s string) *string {
-	return &s
-}
-
-func intToPtr(i int) *int {
-	return &i
 }

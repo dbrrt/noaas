@@ -1,6 +1,8 @@
 package main
 
+import "dbrrt/noaas/routing"
+
 func main() {
-	res, _ := readRemoteUriPayload("https://pastebin.com/raw/v1qLcE15", false)
-	print(res)
+	r := routing.SetupServer()
+	r.Run(":8080")
 }

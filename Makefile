@@ -2,8 +2,6 @@
 GO_BIN := go
 # project sources
 ROOT_PRJ := .
-# test targets options
-TEST_OPTS_WITH_LOGS := -v
 
 .PHONY: tidy
 tidy:

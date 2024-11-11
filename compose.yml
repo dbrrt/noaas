@@ -6,7 +6,6 @@ services:
     command: agent -dev
     privileged: true
     network_mode: host
-    # network_mode: bridge
     environment:
       NOMAD_LOCAL_CONFIG: |
         data_dir = "/nomad/data/"

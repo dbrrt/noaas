@@ -10,6 +10,10 @@
 
 ### Start Nomad service
 
+```bash
+make start_nomad
+```
+
 For the sake of simplicity and portability, nomad has been dockerized and configuration added to a compose file.
 
 ```bash
@@ -23,11 +27,10 @@ Once nomad agent has been started, the nomad UI can be accessed via http://local
 make dev
 ```
 
-
 ### Start E2E
 
 ```bash
-//
+make ci
 ```
 
 ## Comments

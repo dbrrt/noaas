@@ -1,0 +1,35 @@
+name: Setup Nomad
+description: Setup Local Nomad cluster for use in GitHub Actions
+
+runs:
+  using: "composite"
+  steps:
+    - name: Start Nomad cluster in container
+      run: |
+        docker run -d \
+          --name nomad-cluster \
+          -p 4646:4646 \
+          multani/nomad:latest
+      shell: bash
+
+    # Wait for the Nomad cluster to be ready
+    - name: Wait for Nomad to start
+      run: |
+        for i in {1..10}; do
+          if docker exec nomad-cluster nomad node status &> /dev/null; then
+            echo "Nomad is ready"
+            exit 0
+          fi
+          echo "Waiting for Nomad to be ready..."
+          sleep 3
+        done
+        echo "Nomad did not start in time" >&2
+        exit 1
+      shell: bash
+
+  post:
+    - name: Stop and remove Nomad container
+      run: |
+        docker stop nomad-cluster
+        docker rm nomad-cluster
+      shell: bash

@@ -1,20 +1,13 @@
-package main
+package nomad
 
 import (
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/nomad/api"
 )
-
-func stringPtr(s string) *string {
-	return &s
-}
-
-func intToPtr(i int) *int {
-	return &i
-}
 
 func createAJobAndGetUri() {
 	// Create a new Nomad client
@@ -104,8 +97,7 @@ func registerJobAndGetAllocationID(client *api.Client, job *api.Job) (string, er
 func createServiceJob() *api.Job {
 	// Define the service job
 	job := &api.Job{
-		// ID must be uuid
-		ID:          stringPtr("hello-world"),
+		ID:          stringPtr(uuid.New().String()),
 		Name:        stringPtr("noaas-agent"),
 		Type:        stringPtr("service"),
 		Datacenters: []string{"*"}, // Specifies that this job can run in any datacenter

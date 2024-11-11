@@ -15,7 +15,7 @@ import (
 type ServiceController struct{}
 
 type NewServiceRequest struct {
-	Url    string `json:"url" binding:"required,url"`
+	Url    string `json:"url" binding:"required,url,httpOrHttps"`
 	Script string `json:"script" binding:"required"`
 }
 

@@ -8,12 +8,17 @@ runs:
       run: |
         docker run -d \
           --name nomad-cluster \
+          --privileged \
+          --network host \
           -p 4646:4646 \
+          -e NOMAD_LOCAL_CONFIG='data_dir = "/nomad/data/"' \
+          -v /var/run/docker.sock:/var/run/docker.sock:rw \
+          -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
           multani/nomad:latest \
           agent -dev
       shell: bash
 
-    # Wait for the Nomad cluster to be ready
+    # Wait for Nomad to start by pinging port 4646
     - name: Wait for Nomad to be ready
       run: |
         for i in {1..10}; do

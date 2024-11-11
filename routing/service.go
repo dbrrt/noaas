@@ -1,6 +1,8 @@
 package routing
 
 import (
+	"dbrrt/noaas/nomad"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -12,7 +14,7 @@ type ServiceController struct{}
 
 type NewServiceRequest struct {
 	Url    string `json:"url" binding:"required,url"`
-	Script bool   `json:"script" binding:"required"`
+	Script bool   `json:"script"`
 }
 
 type NewServiceResponseStruct struct {
@@ -41,21 +43,20 @@ func (h ServiceController) ServiceProvisionner(c *gin.Context) {
 		})
 
 	} else {
+		nameParam := c.Params.ByName("name")
+		uriDeployed, err := nomad.CreateAJobAndGetUri(nameParam, payload.Url, payload.Script)
 
-		// nameParam := c.Params.ByName("name")
-
-		// if nameParam == "" {
-		// 	c.JSON(http.StatusBadRequest, gin.H{
-		// 		"url":   nil,
-		// 		"error": fmt.Errorf("Missing name parameter"),
-		// 	})
-		// }
-
-		c.JSON(http.StatusOK, gin.H{
-			"url":   "<DEPLOYED_URI>", // Deployed URL
-			"error": nil,
-		})
-
+		if uriDeployed != "" && err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"url":   fmt.Sprintf("http://%s", uriDeployed),
+				"error": nil,
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"url":   nil,
+				"error": fmt.Errorf("something wrong happened during job creation"),
+			})
+		}
 	}
 
 }

@@ -10,7 +10,7 @@ import (
 // Default execCommand function
 var execCommand = exec.Command
 
-func readRemoteUriPayload(uri string, script bool) (string, error) {
+func ReadRemoteUriPayload(uri string, script bool) (string, error) {
 	resp, err := http.Get(uri)
 	if err != nil {
 		return "", fmt.Errorf("error fetching URL: %v", err)

@@ -1,32 +1,36 @@
 package nomad
 
 import (
+	"dbrrt/noaas/readuri"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/nomad/api"
 )
 
-func createAJobAndGetUri() {
+func CreateAJobAndGetUri(jobNameParam string, uriParam string, script bool) (string, error) {
 	// Create a new Nomad client
 	client, err := api.NewClient(api.DefaultConfig())
 	if err != nil {
-		log.Fatalf("Failed to create Nomad client: %v", err)
+		return "", fmt.Errorf("failed to create Nomad client: %v", err)
 	}
 
 	// Create and register the job
-	job := createServiceJob()
+	job, err := createServiceJob(jobNameParam, uriParam, script)
+	if err != nil {
+		return "", fmt.Errorf("error during service job creation: %v", err)
+	}
+
 	allocID, err := registerJobAndGetAllocationID(client, job)
 	if err != nil {
-		log.Fatalf("Failed to get allocation ID: %v", err)
+		return "", fmt.Errorf("failed to register job / retrieve allocation ID: %v", err)
 	}
 
 	// Get allocation info using the allocation ID
 	allocation, _, err := client.Allocations().Info(allocID, nil)
 	if err != nil {
-		log.Fatalf("Failed to retrieve allocation info: %v", err)
+		return "", fmt.Errorf("failed to retrieve allocation info: %v", err)
 	}
 
 	// Find the URI for the "www" dynamic port
@@ -53,9 +57,9 @@ func createAJobAndGetUri() {
 	}
 
 	if uri == "" {
-		fmt.Println("No URI found for the 'www' port.")
+		return "", fmt.Errorf("no URI found for service www")
 	} else {
-		fmt.Printf("Service available at URI: %s\n", uri)
+		return uri, nil
 	}
 }
 
@@ -94,11 +98,11 @@ func registerJobAndGetAllocationID(client *api.Client, job *api.Job) (string, er
 	return allocID, nil
 }
 
-func createServiceJob() *api.Job {
+func createServiceJob(jobName string, uri string, script bool) (*api.Job, error) {
 	// Define the service job
 	job := &api.Job{
 		ID:          stringPtr(uuid.New().String()),
-		Name:        stringPtr("noaas-agent"),
+		Name:        stringPtr(jobName),
 		Type:        stringPtr("service"),
 		Datacenters: []string{"*"}, // Specifies that this job can run in any datacenter
 		Meta: map[string]string{
@@ -127,6 +131,12 @@ func createServiceJob() *api.Job {
 		PortLabel: "www", // Use the dynamic port label for the service
 	}
 
+	payloadRemote, err := readuri.ReadRemoteUriPayload(uri, script)
+
+	if err != nil {
+		return nil, fmt.Errorf("error during remote read payload")
+	}
+
 	// Define task
 	task := &api.Task{
 		Name:   "web",
@@ -139,12 +149,12 @@ func createServiceJob() *api.Job {
 		},
 		Templates: []*api.Template{
 			{
-				EmbeddedTmpl: stringPtr(`<h1>Hello, Nomad!</h1>`),
+				EmbeddedTmpl: stringPtr(payloadRemote),
 				DestPath:     stringPtr("local/index.html"), // Render template to the index.html file
 			},
 		},
 		Resources: &api.Resources{
-			CPU:      intToPtr(50), // CPU allocation
+			CPU:      intToPtr(50), // CPU allocation in Mhz
 			MemoryMB: intToPtr(64), // Memory allocation
 		},
 	}
@@ -157,5 +167,5 @@ func createServiceJob() *api.Job {
 	// Add the task group to the job
 	job.TaskGroups = []*api.TaskGroup{taskGroup}
 
-	return job
+	return job, nil
 }

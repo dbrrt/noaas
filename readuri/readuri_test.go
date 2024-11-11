@@ -19,7 +19,7 @@ func TestReadRemoteUriPayload(t *testing.T) {
 		defer ts.Close()
 
 		// Call the function with the test server's URL
-		result, err := readRemoteUriPayload(ts.URL, false)
+		result, err := ReadRemoteUriPayload(ts.URL, false)
 		assert.NoError(t, err)
 		assert.Equal(t, "Hello, World!", result)
 	})
@@ -32,7 +32,7 @@ func TestReadRemoteUriPayload(t *testing.T) {
 		defer ts.Close()
 
 		// Call the function
-		result, err := readRemoteUriPayload(ts.URL, false)
+		result, err := ReadRemoteUriPayload(ts.URL, false)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "failed to retrieve content. Status code: 404")
 		assert.Empty(t, result)
@@ -40,7 +40,7 @@ func TestReadRemoteUriPayload(t *testing.T) {
 
 	t.Run("Test HTTP request failure", func(t *testing.T) {
 		// Using an invalid URL to simulate failure
-		result, err := readRemoteUriPayload("http://invalid-url", false)
+		result, err := ReadRemoteUriPayload("http://invalid-url", false)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "error fetching URL:")
 		assert.Empty(t, result)
@@ -53,7 +53,7 @@ func TestReadRemoteUriPayload(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		result, err := readRemoteUriPayload(ts.URL, false)
+		result, err := ReadRemoteUriPayload(ts.URL, false)
 		assert.Error(t, err)
 		assert.Empty(t, result)
 	})
@@ -74,7 +74,7 @@ func TestReadRemoteUriPayload(t *testing.T) {
 		}
 
 		// Test the function with script flag set to true
-		result, err := readRemoteUriPayload(ts.URL, true)
+		result, err := ReadRemoteUriPayload(ts.URL, true)
 		assert.NoError(t, err)
 		assert.Equal(t, "Hello from the script\n", result)
 	})
@@ -94,7 +94,7 @@ func TestReadRemoteUriPayload(t *testing.T) {
 			return exec.Command("sh", "-c", "invalid script")
 		}
 
-		result, err := readRemoteUriPayload(ts.URL, true)
+		result, err := ReadRemoteUriPayload(ts.URL, true)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "error executing script:")
 		assert.Empty(t, result)
@@ -108,14 +108,14 @@ func TestReadRemoteUriPayload(t *testing.T) {
 		defer ts.Close()
 
 		// Call the function
-		result, err := readRemoteUriPayload(ts.URL, false)
+		result, err := ReadRemoteUriPayload(ts.URL, false)
 		assert.NoError(t, err)
 		assert.Empty(t, result)
 	})
 
 	t.Run("Test invalid URI", func(t *testing.T) {
 		// Test invalid URI
-		result, err := readRemoteUriPayload("http://", false)
+		result, err := ReadRemoteUriPayload("http://", false)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "error fetching URL:")
 		assert.Empty(t, result)

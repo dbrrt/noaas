@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/nomad/api"
 )
@@ -14,17 +15,82 @@ func main() {
 		log.Fatalf("Failed to create Nomad client: %v", err)
 	}
 
-	j := createServiceJob()
+	// Create and register the job
+	job := createServiceJob()
+	allocID, err := registerJobAndGetAllocationID(client, job)
+	if err != nil {
+		log.Fatalf("Failed to get allocation ID: %v", err)
+	}
 
-	registerJob(client, j)
+	// Get allocation info using the allocation ID
+	allocation, _, err := client.Allocations().Info(allocID, nil)
+	if err != nil {
+		log.Fatalf("Failed to retrieve allocation info: %v", err)
+	}
 
-	// uri, err := getJobUri(client, "hello-world")
+	// Find the URI for the "www" dynamic port
+	var uri string
+	if allocation.AllocatedResources != nil {
+		for _, network := range allocation.AllocatedResources.Shared.Networks {
+			for _, port := range network.DynamicPorts {
+				if port.Label == "www" { // Look for the "www" port label
+					// Ensure IP is available
+					if network.IP != "" {
+						uri = fmt.Sprintf("%s:%d", network.IP, port.Value)
+						break
+					} else {
+						fmt.Println("IP not yet available; waiting...")
+						time.Sleep(5 * time.Second)
+					}
+				}
+			}
+			// Exit the outer loop if URI has been set
+			if uri != "" {
+				break
+			}
+		}
+	}
 
-	// if err != nil {
-	// 	log.Fatalf("Failed: %v", err)
-	// }
+	if uri == "" {
+		fmt.Println("No URI found for the 'www' port.")
+	} else {
+		fmt.Printf("Service available at URI: %s\n", uri)
+	}
+}
 
-	// fmt.Printf(uri)
+func registerJobAndGetAllocationID(client *api.Client, job *api.Job) (string, error) {
+	// Register the job with Nomad
+	resp, _, err := client.Jobs().Register(job, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to register job: %v", err)
+	}
+
+	// Output Job ID and Evaluation ID
+	fmt.Printf("Job registered: ID=%s EvalID=%s\n", *job.ID, resp.EvalID)
+
+	var allocID string
+
+	// Poll until at least one allocation is available
+	for {
+		// Fetch allocations for the job
+		allocs, _, err := client.Jobs().Allocations(*job.ID, false, nil)
+		if err != nil {
+			return "", fmt.Errorf("failed to retrieve allocations: %v", err)
+		}
+
+		// Check if allocations are available
+		if len(allocs) > 0 {
+			allocID = allocs[0].ID // Get the ID of the first allocation
+			fmt.Printf("Allocation ID found: %s\n", allocID)
+			break
+		}
+
+		// Wait before polling again
+		fmt.Println("Waiting for allocation to be created...")
+		time.Sleep(5 * time.Second)
+	}
+
+	return allocID, nil
 }
 
 func createServiceJob() *api.Job {
@@ -72,15 +138,8 @@ func createServiceJob() *api.Job {
 		},
 		Templates: []*api.Template{
 			{
-				EmbeddedTmpl: stringPtr(`<h1>Hello, Nomad!</h1>
-<ul>
-  <li>Task: {{env "NOMAD_TASK_NAME"}}</li>
-  <li>Group: {{env "NOMAD_GROUP_NAME"}}</li>
-  <li>Job: {{env "NOMAD_JOB_NAME"}}</li>
-  <li>Metadata value for foo: {{env "NOMAD_META_foo"}}</li>
-  <li>Currently running on port: {{env "NOMAD_PORT_www"}}</li>
-</ul>`),
-				DestPath: stringPtr("local/index.html"), // Render template to the index.html file
+				EmbeddedTmpl: stringPtr(`<h1>Hello, Nomad!</h1>`),
+				DestPath:     stringPtr("local/index.html"), // Render template to the index.html file
 			},
 		},
 		Resources: &api.Resources{
@@ -98,76 +157,6 @@ func createServiceJob() *api.Job {
 	job.TaskGroups = []*api.TaskGroup{taskGroup}
 
 	return job
-}
-
-func registerJob(client *api.Client, job *api.Job) {
-	// Register the job with Nomad
-	resp, _, err := client.Jobs().Register(job, nil)
-	if err != nil {
-		log.Fatalf("Failed to register job: %v", err)
-	}
-
-	// Output Job ID and Evaluate ID
-	fmt.Printf("Job registered: ID=%s EvalID=%s\n", *job.ID, resp.EvalID)
-
-	// Optional: Monitor job deployment status
-	// waitForJobCompletion(client, *job.ID)
-}
-
-func getJobUri(client *api.Client, jobId string) (string, error) {
-	// Get the job's allocation list stubs
-	allocationStubs, _, err := client.Jobs().Allocations(jobId, false, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to get allocations for job %s: %v", jobId, err)
-	}
-
-	// Iterate over allocation stubs to find the first running allocation
-	var alloc *api.Allocation
-	for _, allocStub := range allocationStubs {
-		if allocStub.ClientStatus == "running" {
-			// Fetch full allocation details using the allocation ID
-			alloc, _, err = client.Allocations().Info(allocStub.ID, nil)
-			if err != nil {
-				return "", fmt.Errorf("failed to get allocation info for ID %s: %v", allocStub.ID, err)
-			}
-			break
-		}
-	}
-
-	if alloc == nil {
-		return "", fmt.Errorf("no running allocations found for job %s", jobId)
-	}
-
-	// Retrieve the node details for this allocation
-	node, _, err := client.Nodes().Info(alloc.NodeID, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to get node info for node %s: %v", alloc.NodeID, err)
-	}
-	// Retrieve the IP address from the node's Resources or Network info
-	var nodeIP string
-	for _, address := range node.Resources.Networks {
-		nodeIP = address.IP // Assuming there's an IPAddress field in the network struct
-		break
-	}
-
-	if nodeIP == "" {
-		return "", fmt.Errorf("no IP address found for node %s", alloc.NodeID)
-	}
-	// Get the first dynamically allocated port (if any) from the allocation's resources
-	var port int
-	for _, p := range alloc.AllocatedResources.Shared.Ports {
-		port = p.Value
-		break // Take the first available port
-	}
-
-	if port == 0 {
-		return "", fmt.Errorf("no allocated ports found for allocation %s", alloc.ID)
-	}
-
-	// Construct the URI
-	// Construct the URI
-	uri := fmt.Sprintf("http://%s:%d", nodeIP, port)
-	return uri, nil
 }
 
 func stringPtr(s string) *string {

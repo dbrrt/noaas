@@ -29,3 +29,7 @@ make dev
 ```bash
 //
 ```
+
+## Comments
+
+- busybox has been used instead of nginx, as it's simpler to configure, can receive dynamic port through command line, doesn't require a custom configuration file.

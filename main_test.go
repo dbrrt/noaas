@@ -63,10 +63,21 @@ func TestServiceProvisionner(t *testing.T) {
 		return resp, response
 	}
 
-	t.Run("Valid Request", func(t *testing.T) {
+	t.Run("Valid Request - script false", func(t *testing.T) {
 		resp, response := sendPutRequest("/v1/services/testName", map[string]interface{}{
-			"url":    "http://valid-url.com",
-			"script": true,
+			"url":    "https://pastebin.com/raw/hEFbnx33",
+			"script": "false",
+		})
+
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.NotNil(t, response.Url)
+		assert.Nil(t, response.Error)
+	})
+
+	t.Run("Valid Request - script true", func(t *testing.T) {
+		resp, response := sendPutRequest("/v1/services/remoteExec", map[string]interface{}{
+			"url":    "https://pastebin.com/raw/D0Fn7kAr",
+			"script": "true",
 		})
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -77,7 +88,7 @@ func TestServiceProvisionner(t *testing.T) {
 	t.Run("Wrong path", func(t *testing.T) {
 		resp, response := sendPutRequest("/v1/services/", map[string]interface{}{
 			"url":    "http://valid-url.com",
-			"script": true,
+			"script": "true",
 		})
 
 		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
@@ -87,7 +98,7 @@ func TestServiceProvisionner(t *testing.T) {
 	t.Run("Invalid URI", func(t *testing.T) {
 		resp, response := sendPutRequest("/v1/services/testName", map[string]interface{}{
 			"url":    "not-a-valid-url",
-			"script": true,
+			"script": "true",
 		})
 
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
@@ -96,7 +107,7 @@ func TestServiceProvisionner(t *testing.T) {
 		assert.Contains(t, *response.Error, "url")
 	})
 
-	t.Run("Missing Script Parameter", func(t *testing.T) {
+	t.Run("Missing script parameter should raise bad request", func(t *testing.T) {
 		resp, response := sendPutRequest("/v1/services/testName", map[string]interface{}{
 			"url": "http://valid-url.com",
 		})

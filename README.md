@@ -29,7 +29,6 @@ Once nomad agent has been started, the nomad UI can be accessed via http://local
 make dev
 ```
 
-
 ### Start Unit
 
 ```bash
@@ -52,7 +51,7 @@ make ci
 
 ## Notes
 
-- busybox has been used instead of nginx, as it's simpler to configure, can receive dynamic port through command line, doesn't require a custom configuration file.
-- only one package has been defined for the sake of simplicity, in a larger codebase, I'd split across multiple package to foster better isolation
-- remote code execution is dangerous, I've skipped the sanity checks, but that's something required in a secured context.
-- I've created a custom action to test my services with a Nomad cluster in GitHub actions
+- busybox has been used instead of nginx, as it's simpler to configure, can receive dynamic port through command line, doesn't require a custom configuration file, then I've been able to focus on code quality over nginx configuration.
+- Remote code execution is dangerous, I've skipped the sanity checks, but that's something required in a secured context.
+- Created a custom action to test my services with a Nomad cluster in GitHub actions
+- Replaced script query parameter type from boolean to string for parsing conveniency by routing validation

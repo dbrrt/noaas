@@ -3,8 +3,10 @@ package routing
 import (
 	"dbrrt/noaas/nomad"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -14,7 +16,7 @@ type ServiceController struct{}
 
 type NewServiceRequest struct {
 	Url    string `json:"url" binding:"required,url"`
-	Script bool   `json:"script"`
+	Script string `json:"script" binding:"required"`
 }
 
 type NewServiceResponseStruct struct {
@@ -44,7 +46,13 @@ func (h ServiceController) ServiceProvisionner(c *gin.Context) {
 
 	} else {
 		nameParam := c.Params.ByName("name")
-		uriDeployed, err := nomad.CreateAJobAndGetUri(nameParam, payload.Url, payload.Script)
+
+		queryBodyScriptParam, err := strconv.ParseBool(payload.Script)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		uriDeployed, err := nomad.CreateAJobAndGetUri(nameParam, payload.Url, queryBodyScriptParam)
 
 		if uriDeployed != "" && err == nil {
 			c.JSON(http.StatusOK, gin.H{

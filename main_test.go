@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Response structure to match the expected response from the ServiceProvisionner endpoint.
+// Response structure to match the expected response from the ServiceProvisioner endpoint.
 type ResponseStruct struct {
 	Url   *string `json:"url"`
 	Error *string `json:"error"`
@@ -38,8 +38,8 @@ func TestHealthRoute(t *testing.T) {
 	assert.Equal(t, []string{"text/plain; charset=utf-8"}, val)
 }
 
-// TestServiceProvisionner tests various scenarios for the ServiceProvisionner endpoint.
-func TestServiceProvisionner(t *testing.T) {
+// TestServiceProvisioner tests various scenarios for the ServiceProvisioner endpoint.
+func TestServiceProvisioner(t *testing.T) {
 	// Start a new test server with the routing setup.
 	ts := httptest.NewServer(routing.SetupServer())
 	defer ts.Close()

@@ -35,7 +35,7 @@ func isHttpOrHttps(fl validator.FieldLevel) bool {
 	return parsedUrl.Scheme == "http" || parsedUrl.Scheme == "https"
 }
 
-func (h ServiceController) ServiceProvisionner(c *gin.Context) {
+func (h ServiceController) ServiceProvisioner(c *gin.Context) {
 
 	var payload NewServiceRequest
 	if err := c.ShouldBindJSON(&payload); err != nil {

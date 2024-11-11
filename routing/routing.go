@@ -20,7 +20,7 @@ func NoaasRouter() *gin.Engine {
 
 	v1 := router.Group("v1")
 
-	v1.PUT("/services/:name", new(ServiceController).ServiceProvisionner)
+	v1.PUT("/services/:name", new(ServiceController).ServiceProvisioner)
 
 	return router
 

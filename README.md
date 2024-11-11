@@ -1,5 +1,7 @@
 # Nomad-as a Service
 
+[![noaas-go-ci](https://github.com/dbrrt/noaas/actions/workflows/ci.yml/badge.svg)](https://github.com/dbrrt/noaas/actions/workflows/ci.yml)
+
 ## Requirements
 
 - Nomad agent available https://developer.hashicorp.com/nomad/docs/install

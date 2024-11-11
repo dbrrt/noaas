@@ -26,10 +26,3 @@ runs:
         echo "Nomad did not start in time" >&2
         exit 1
       shell: bash
-
-  post:
-    - name: Stop and remove Nomad container
-      run: |
-        docker stop nomad-cluster
-        docker rm nomad-cluster
-      shell: bash

@@ -5,7 +5,7 @@
 ## Requirements
 
 - Nomad agent available https://developer.hashicorp.com/nomad/docs/install
-- Golang 1.20+ (tested on 1.22)
+- Golang 1.19+ recommended (tested on 1.19,1.20,1.22) https://go.dev/doc/install
 - Docker (optional, to use Nomad dockerized)
 
 ## Get Started

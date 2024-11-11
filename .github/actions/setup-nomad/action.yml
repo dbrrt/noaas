@@ -9,7 +9,8 @@ runs:
         docker run -d \
           --name nomad-cluster \
           -p 4646:4646 \
-          multani/nomad:latest
+          multani/nomad:latest \
+          agent -dev
       shell: bash
 
     # Wait for the Nomad cluster to be ready

@@ -14,10 +14,10 @@ runs:
       shell: bash
 
     # Wait for the Nomad cluster to be ready
-    - name: Wait for Nomad to start
+    - name: Wait for Nomad to be ready
       run: |
         for i in {1..10}; do
-          if docker exec nomad-cluster nomad node status &> /dev/null; then
+          if curl --silent --fail http://localhost:4646/v1/status/leader &> /dev/null; then
             echo "Nomad is ready"
             exit 0
           fi

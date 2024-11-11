@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"dbrrt/noaas/readuri"
 	"dbrrt/noaas/routing"
 	"encoding/json"
 	"fmt"
@@ -72,6 +73,12 @@ func TestServiceProvisionner(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.NotNil(t, response.Url)
 		assert.Nil(t, response.Error)
+
+		// fetch response.Url and check content = Hello world, this is the content of my webpage
+		expectedContent := "Hello world, this is the content of my webpage"
+		deployedContent, deployedError := readuri.ReadRemoteUriPayload(*response.Url, false)
+		assert.Equal(t, expectedContent, deployedContent)
+		assert.Nil(t, deployedError)
 	})
 
 	t.Run("Valid Request - script true", func(t *testing.T) {
@@ -83,6 +90,12 @@ func TestServiceProvisionner(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.NotNil(t, response.Url)
 		assert.Nil(t, response.Error)
+
+		// fetch response.Url and check content = Hello world!\n
+		expectedContent := "Hello world!\n"
+		deployedContent, deployedError := readuri.ReadRemoteUriPayload(*response.Url, false)
+		assert.Equal(t, expectedContent, deployedContent)
+		assert.Nil(t, deployedError)
 	})
 
 	t.Run("Wrong path", func(t *testing.T) {

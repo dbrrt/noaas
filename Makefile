@@ -27,3 +27,7 @@ ci:
 .PHONY: unit
 unit:
 	$(GO_TEST) ./readuri
+
+.PHONY: coverage
+coverage:
+	$(GO_TEST) -cover ./...

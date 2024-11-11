@@ -49,6 +49,12 @@ make start_nomad_compose
 make ci
 ```
 
+### Measure Code coverage
+
+```bash
+make coverage
+```
+
 ## Notes
 
 - busybox has been used instead of nginx, as it's simpler to configure, can receive dynamic port through command line, doesn't require a custom configuration file, then I've been able to focus on code quality over nginx configuration.

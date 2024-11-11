@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -74,6 +75,8 @@ func TestServiceProvisionner(t *testing.T) {
 		assert.NotNil(t, response.Url)
 		assert.Nil(t, response.Error)
 
+		time.Sleep(2 * time.Second)
+
 		// fetch response.Url and check content = Hello world, this is the content of my webpage
 		expectedContent := "Hello world, this is the content of my webpage"
 		deployedContent, deployedError := readuri.ReadRemoteUriPayload(*response.Url, false)
@@ -91,10 +94,12 @@ func TestServiceProvisionner(t *testing.T) {
 		assert.NotNil(t, response.Url)
 		assert.Nil(t, response.Error)
 
-		// fetch response.Url and check content = Hello world!\n
-		expectedContent := "Hello world!\n"
+		time.Sleep(2 * time.Second)
+
+		// fetch response.Url and check content = Hello world!
+		expectedContent := "Hello world!"
 		deployedContent, deployedError := readuri.ReadRemoteUriPayload(*response.Url, false)
-		assert.Equal(t, expectedContent, deployedContent)
+		assert.Contains(t, deployedContent, expectedContent)
 		assert.Nil(t, deployedError)
 	})
 

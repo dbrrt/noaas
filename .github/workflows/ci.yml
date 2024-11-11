@@ -6,7 +6,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go-version: [1.20.x, 1.22.x]
+        go-version: [1.22.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -14,14 +14,6 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go-version }}
-    - name: Checkout code
-      uses: actions/checkout@v2
-    # - name: Test
-    #   run: go test ./...
-
-  test-cache:
-    runs-on: ubuntu-latest
-    steps:
     - name: Checkout code
       uses: actions/checkout@v2
     - uses: actions/cache@v2
@@ -33,9 +25,5 @@ jobs:
           ~/go/pkg/mod
           ~/.cache/go-build
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    # - name: Test
-    #   run: make test
     - name: CI
       run: make ci

@@ -23,7 +23,7 @@ make start_nomad_compose
 ```
 Once nomad agent has been started, the nomad UI can be accessed via http://localhost:4646
 
-## Start NoaaS
+### Start NoaaS API local
 
 ```bash
 make dev
